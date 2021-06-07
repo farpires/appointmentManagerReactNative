@@ -12,7 +12,7 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import shortid from 'shortid';
 
-const Formulario = ({citas, setCitas, setShowForm}) => {
+const Formulario = ({citas, setCitas, setShowForm, setQuotesStorage}) => {
   const [patient, setPatient] = useState('');
   const [owner, setOwner] = useState('');
   const [phone, setPhone] = useState('');
@@ -71,10 +71,17 @@ const Formulario = ({citas, setCitas, setShowForm}) => {
     const citasNew = [...citas, cita];
     setCitas(citasNew);
 
+    //pasar las nuevas citas a storage
+    setQuotesStorage(JSON.stringify(citasNew));
+
     //ocultar el formulario
     setShowForm(false);
 
     //resetar el formulario
+    setPatient('');
+    setOwner('');
+    setPhone('');
+    setSymptom('');
   };
 
   const showAlert = () => {

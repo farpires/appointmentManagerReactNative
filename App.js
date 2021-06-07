@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Text,
   StyleSheet,
@@ -11,21 +11,31 @@ import {
 } from 'react-native';
 import Cita from './components/citas';
 import Formulario from './components/formulario';
+import AsyncStorage from '@react-native-community/async-storage';
 const App = () => {
   //state
+  const [citas, setCitas] = useState([]);
   const [showForm, setShowForm] = useState(true);
 
-  const [citas, setCitas] = useState([
-    {id: 1, patient: 'Hook', owner: 'juan', symptom: 'No come'},
-    {id: 2, patient: 'Redux', owner: 'josue', symptom: 'No duerme'},
-    {id: 3, patient: 'Native', owner: 'Itzel', symptom: 'No canta'},
-  ]);
+  useEffect(() => {
+    const setQuotesStorage = async () => {
+      try {
+        const quotesStorage = await AsyncStorage.getItem('quotes');
+        if (quotesStorage) {
+          setCitas(JSON.parse(quotesStorage));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    setQuotesStorage();
+  }, []);
 
   // elimina los patients del state
   const removePatient = id => {
-    setCitas(citaActual => {
-      return citaActual.filter(cita => cita.id !== id);
-    });
+    const quotesFilt = citas.filter(cita => cita.id !== id);
+    setCitas(quotesFilt);
+    setQuotesStorage(JSON.stringify(quotesFilt));
   };
   // show a form
   const showform = () => {
@@ -35,6 +45,16 @@ const App = () => {
   const closeScanner = () => {
     Keyboard.dismiss();
   };
+
+  //alamacenar todas las cita
+  const setQuotesStorage = async quotesJSON => {
+    try {
+      await AsyncStorage.setItem('quotes', quotesJSON);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <TouchableNativeFeedback onPress={() => closeScanner()}>
       <View style={styles.container}>
@@ -56,6 +76,7 @@ const App = () => {
                 citas={citas}
                 setCitas={setCitas}
                 setShowForm={setShowForm}
+                setQuotesStorage={setQuotesStorage}
               />
             </>
           ) : (
